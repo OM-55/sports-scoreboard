@@ -599,9 +599,14 @@
       }
 
       function renderWinnerOnly(game) {
+        let displaySport = game.sport;
+        if (displaySport.toLowerCase() === 'musical chairs') displaySport = 'Kadam Taal';
+
+        let displayGender = (game.gender || '').toLowerCase() === 'mix' ? '' : `(${game.gender})`;
+
         return `
           <div class="game-header">
-            <div class="game-title">${game.sport} (${game.gender})</div>
+            <div class="game-title">${displaySport} ${displayGender}</div>
             <div class="status status-${game.status}">${game.status}</div>
           </div>
 

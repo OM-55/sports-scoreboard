@@ -238,8 +238,14 @@
                     console.log('✅ Game data:', data);
 
                     // Update page
-                    document.getElementById('page-title').textContent = `${data.sport} (${data.gender}) - Live Score`;
-                    document.getElementById('gameTitle').textContent = `${data.sport} (${data.gender})`;
+                    let sportName = data.sport;
+                    if (sportName.toLowerCase() === 'musical chairs') sportName = 'Kadam Taal';
+
+                    const genderText = data.gender.toLowerCase() === 'mix' ? '' : ` (${data.gender})`;
+                    const titleText = `${sportName}${genderText}`;
+
+                    document.getElementById('page-title').textContent = `${titleText} - Live Score`;
+                    document.getElementById('gameTitle').textContent = titleText;
 
                     const statusEl = document.getElementById('gameStatus');
                     statusEl.textContent = data.status;
