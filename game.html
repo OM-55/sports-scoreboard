@@ -299,14 +299,15 @@
                     }
 
                     // Decide if scores should be shown
-                    const winnerOnlySports = ['relay', 'tug of war', 'musical chairs', 'kadam taal'];
+                    const winnerOnlySports = ['relay', 'tug of war', 'kadam taal', 'musical chairs'];
                     const isWinnerOnly = winnerOnlySports.some(s => data.sport.toLowerCase().includes(s));
-                    const scoreDisplayA = isWinnerOnly ? '—' : (data.score_a || '0');
-                    const scoreDisplayB = isWinnerOnly ? '—' : (data.score_b || '0');
+                    // User requested empty space instead of dashes
+                    const scoreDisplayA = isWinnerOnly ? '&nbsp;' : (data.score_a || '0');
+                    const scoreDisplayB = isWinnerOnly ? '&nbsp;' : (data.score_b || '0');
 
                     // Team A
                     document.getElementById('teamAName').textContent = data.team_a;
-                    document.getElementById('teamAScore').textContent = scoreDisplayA;
+                    document.getElementById('teamAScore').innerHTML = scoreDisplayA; // Use innerHTML for &nbsp;
 
                     const teamABadge = document.getElementById('teamABadge');
                     teamABadge.innerHTML = '';
@@ -320,7 +321,7 @@
 
                     // Team B
                     document.getElementById('teamBName').textContent = data.team_b;
-                    document.getElementById('teamBScore').textContent = scoreDisplayB;
+                    document.getElementById('teamBScore').innerHTML = scoreDisplayB;
 
                     const teamBBadge = document.getElementById('teamBBadge');
                     teamBBadge.innerHTML = '';
