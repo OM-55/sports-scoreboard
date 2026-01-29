@@ -17,7 +17,7 @@
 <body>
 
   <div class="title">
-    <h1 style="font-size: 48px; font-weight: 800; text-transform: uppercase;">Excellencia</h1>
+    <h1 style="font-size: clamp(32px, 8vw, 48px); font-weight: 800; text-transform: uppercase;">Excellencia</h1>
     <p style="font-size: 20px; font-weight: 500; opacity: 0.9;">Live Sports Scoreboard</p>
     <button onclick="location.reload(true)"
       style="margin-top: 15px; padding: 10px 20px; background: #00a86b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">🔄
@@ -25,23 +25,37 @@
   </div>
 
   <!-- Overall Standings Summary -->
-  <div id="overallStandings" style="max-width: 600px; margin: 0 auto 30px auto; display: none;">
+  <!-- Overall Standings Summary (Responsive) -->
+  <div id="overallStandings"
+    style="display: none; width: 92%; max-width: 600px; margin: 0 auto 30px auto; border-radius: 16px; position: relative; z-index: 5;">
     <div
-      style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border-radius: 16px; padding: 20px; border: 2px solid #ffd700; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
       <h2
-        style="color: #ffd700; text-align: center; margin: 0 0 15px 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">
-        🏆 Championship Standings</h2>
-      <div style="display: flex; justify-content: space-around; align-items: center;">
-        <div style="text-align: center;">
-          <div style="color: white; font-weight: 700; font-size: 18px; margin-bottom: 5px;">MBA 1st Year</div>
-          <div id="wins1st" style="color: #4ade80; font-size: 36px; font-weight: 800;">0</div>
-          <div style="color: rgba(255,255,255,0.7); font-size: 12px;">WINS</div>
+        style="color: #ffd700; text-align: center; margin: 0 0 20px 0; font-size: clamp(20px, 5vw, 24px); text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+        🏆 Championship
+      </h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+        <!-- Team 1 -->
+        <div style="text-align: center; flex: 1;">
+          <div style="color: #e5e7eb; font-weight: 700; font-size: clamp(14px, 4vw, 18px); margin-bottom: 5px;">MBA 1st
+          </div>
+          <div id="wins1st"
+            style="color: #4ade80; font-size: clamp(36px, 12vw, 56px); line-height: 1; font-weight: 800; text-shadow: 0 0 20px rgba(74, 222, 128, 0.3);">
+            0</div>
+          <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 5px; font-weight: 600;">WINS</div>
         </div>
-        <div style="font-size: 24px; color: rgba(255,255,255,0.3);">VS</div>
-        <div style="text-align: center;">
-          <div style="color: white; font-weight: 700; font-size: 18px; margin-bottom: 5px;">MBA 2nd Year</div>
-          <div id="wins2nd" style="color: #60a5fa; font-size: 36px; font-weight: 800;">0</div>
-          <div style="color: rgba(255,255,255,0.7); font-size: 12px;">WINS</div>
+
+        <!-- VS -->
+        <div style="font-size: 20px; color: rgba(255,255,255,0.2); font-weight: 900; font-style: italic;">VS</div>
+
+        <!-- Team 2 -->
+        <div style="text-align: center; flex: 1;">
+          <div style="color: #e5e7eb; font-weight: 700; font-size: clamp(14px, 4vw, 18px); margin-bottom: 5px;">MBA 2nd
+          </div>
+          <div id="wins2nd"
+            style="color: #60a5fa; font-size: clamp(36px, 12vw, 56px); line-height: 1; font-weight: 800; text-shadow: 0 0 20px rgba(96, 165, 250, 0.3);">
+            0</div>
+          <div style="color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 5px; font-weight: 600;">WINS</div>
         </div>
       </div>
     </div>
