@@ -85,7 +85,14 @@ async function loadScores() {
       if (game.show_score && game.status !== 'UPCOMING') {
         let scoreHTML = battingInfoHTML; // Add batting info first
 
-        if (game.score_a || game.score_b) {
+        // Define winner-only sports (no numeric score shown)
+        const winnerOnlySports = ['relay', 'tug of war', 'musical chairs', 'kadam taal'];
+        const isWinnerOnly = winnerOnlySports.some(s => game.sport.toLowerCase().includes(s));
+
+        if (isWinnerOnly) {
+          scoreHTML += `<p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">${game.status === 'ENDED' ? 'Event Ended' : 'Winner-only event'}</p>`;
+        }
+        else if (game.score_a || game.score_b) {
           // For set-based sports: show current set and sets won
           if (['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'LIVE') {
             const currentSet = game.current_set || 1;
