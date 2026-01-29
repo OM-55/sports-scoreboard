@@ -525,6 +525,17 @@ body::after {
   outline-offset: 3px;
 }
 
+/* Credit Footer */
+.credit {
+  text-align: center;
+  color: white;
+  margin: 40px 0 20px 0;
+  font-size: 20px;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
 /* ========================================
    PRINT STYLES
    ======================================== */
