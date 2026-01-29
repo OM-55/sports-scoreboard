@@ -565,13 +565,19 @@
               </button>
             </div>
             
-            <!-- Manual Set Number -->
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <label style="font-weight: 600; font-size: 13px;">Jump to Set:</label>
-              <input type="number" id="manual_set_${game.game_id}" min="1" max="5" value="${game.current_set || 1}" 
-                     style="padding: 6px 10px; border-radius: 4px; border: 2px solid #92400e; width: 70px; font-weight: 600;">
-              <button class="btn-success" onclick="setCurrentSet(${game.game_id})" style="padding: 6px 12px; font-size: 13px;">
-                Go to Set
+            <!-- Manual Set Number & Reset -->
+            <div style="display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="font-weight: 600; font-size: 13px;">Jump to Set:</label>
+                <input type="number" id="manual_set_${game.game_id}" min="1" max="5" value="${game.current_set || 1}" 
+                       style="padding: 6px 10px; border-radius: 4px; border: 2px solid #92400e; width: 60px; font-weight: 600;">
+                <button class="btn-success" onclick="setCurrentSet(${game.game_id})" style="padding: 6px 12px; font-size: 13px;">
+                  Go
+                </button>
+              </div>
+              
+              <button class="btn-danger" onclick="resetSets(${game.game_id})" style="padding: 6px 12px; font-size: 13px; background-color: #ef4444;">
+                🗑️ Reset All Sets
               </button>
             </div>
           </div>
@@ -834,6 +840,24 @@
         }).eq('game_id', gameId).then(({ error }) => {
           if (error) alert('Error: ' + error.message);
           else {
+            loadGames();
+          }
+        });
+      }
+
+      window.resetSets = function (gameId) {
+        if (!confirm('⚠️ WARNING: This will RESET ALL set history and scores to 0-0. Are you sure?')) return;
+
+        db.from('scores').update({
+          current_set: 1,
+          set_scores: {},
+          set_winners: [],
+          score_a: '0',
+          score_b: '0'
+        }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else {
+            alert('Sets reset successfully!');
             loadGames();
           }
         });
