@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sports Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+      gap: 20px;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .game-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .status {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-LIVE {
+      background: #dcfce7;
+      color: #166534;
+      animation: pulse 2s infinite;
+    }
+
+    .status-UPCOMING {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-ENDED {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    .team-section {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .batting-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #10b981;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .team-label {
+      font-weight: bold;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
+
+    .score-display {
+      font-size: 24px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 10px 0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .btn-run {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-boundary {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-six {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    .btn-wicket {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-extra {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-warning {
+      background: #f59e0b;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-save {
+      background: #8b5cf6;
+      color: white;
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+    }
+
+    .btn-switch {
+      background: #06b6d4;
+      color: white;
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e5e7eb;
+      border-radius: 6px;
+      margin: 5px 0;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 Sports Admin Panel</h1>
+      <p>Manage all sports scores in real-time</p>
+      <a href="index.html" target="_blank" style="color: #667eea; font-weight: bold;">📺 Open Live Scoreboard
+        →</a>
+      <button onclick="logout()"
+        style="margin-left: 20px; padding: 10px 20px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">🔒
+        Logout</button>
+    </div>
+    <div class="games-grid" id="gamesGrid"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // 🔒 PASSWORD PROTECTION
+    (function () {
+      const ADMIN_PASSWORD = "sports2026"; // Change this password!
+      const isAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
+
+      if (!isAuthenticated) {
+        const password = prompt('🔒 Enter Admin Password:');
+        if (password !== ADMIN_PASSWORD) {
+          alert('❌ Incorrect password! Access denied.');
+          window.location.href = 'index.html';
+          throw new Error('Authentication failed');
+        }
+        sessionStorage.setItem('adminAuth', 'true');
+        alert('✅ Access granted! Welcome to Admin Panel.');
+      }
+    })();
+
+    (function () {
+      const SUPABASE_URL = "https://cbyvvnugycxpzrjjudff.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNieXZ2bnVneWN4cHpyamp1ZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MDY3MDIsImV4cCI6MjA4NTA4MjcwMn0.M2LQuMbTB3v4fI4URlIP73tP_THHEYS7xOMp-OBO9RU";
+
+      const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      let gamesData = [];
+      let autoRefresh = null;
+
+      window.loadGames = function () {
+        db.from('scores').select('*').order('game_id').then(({ data, error }) => {
+          if (error) {
+            alert('Error loading games: ' + error.message);
+            return;
+          }
+          gamesData = data;
+          renderGames();
+        });
+      }
+
+      function parseScore(scoreStr) {
+        if (!scoreStr) return { runs: 0, wickets: 0, balls: 0 };
+        const match = scoreStr.match(/(\d+)\/(\d+)\s*\((\d+)\.(\d+)/);
+        if (match) {
+          return {
+            runs: parseInt(match[1]),
+            wickets: parseInt(match[2]),
+            balls: parseInt(match[3]) * 6 + parseInt(match[4])
+          };
+        }
+        return { runs: 0, wickets: 0, balls: 0 };
+      }
+
+      function formatScore(runs, wickets, balls) {
+        const overs = Math.floor(balls / 6);
+        const remainingBalls = balls % 6;
+        return `${runs}/${wickets} (${overs}.${remainingBalls} ov)`;
+      }
+
+      function renderGames() {
+        const grid = document.getElementById('gamesGrid');
+        grid.innerHTML = '';
+
+        gamesData.forEach(game => {
+          const card = document.createElement('div');
+          card.className = 'game-card';
+
+          if (game.sport === 'cricket') {
+            card.innerHTML = renderCricket(game);
+          } else if (['volleyball', 'throwball', 'handball'].includes(game.sport)) {
+            card.innerHTML = renderPointsSport(game);
+          } else {
+            card.innerHTML = renderWinnerOnly(game);
+          }
+
+          grid.appendChild(card);
+        });
+      }
+
+      function renderCricket(game) {
+        const scoreA = parseScore(game.score_a);
+        const scoreB = parseScore(game.score_b);
+        const battingA = game.batting_team === 'team_a';
+        const battingB = game.batting_team === 'team_b';
+
+        return `
+          <div class="game-header">
+            <div class="game-title">🏏 ${game.sport} (${game.gender})</div>
+            <div class="status status-${game.status}">${game.status}</div>
+          </div>
+
+          <div class="team-section">
+            ${battingA ? '<div class="batting-badge">🏏 BATTING</div>' : ''}
+            <div class="team-label">${game.team_a}</div>
+            <div class="score-display" contenteditable="true" id="display_a_${game.game_id}" 
+                 onblur="autoSave(${game.game_id})" 
+                 style="cursor: text; border: 2px dashed transparent; padding: 5px; border-radius: 4px;"
+                 onfocus="this.style.borderColor='#667eea'" 
+                 onblur="this.style.borderColor='transparent'; autoSave(${game.game_id})">${game.score_a || '0/0 (0.0 ov)'}</div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">💡 Click score to edit manually</p>
+            
+            ${battingA ? `
+              <div style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #0369a1;">⚾ Regular Deliveries:</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'a', 0)">Dot Ball</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'a', 1)">1 Run</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'a', 2)">2 Runs</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'a', 3)">3 Runs</button>
+                  <button class="btn-boundary" onclick="addBall(${game.game_id}, 'a', 4)">4 (Boundary)</button>
+                  <button class="btn-six" onclick="addBall(${game.game_id}, 'a', 6)">6 (Six)</button>
+                </div>
+              </div>
+
+              <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #92400e;">🚫 Extras (No Ball Counted):</p>
+                <div class="buttons">
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'a', 1)">Wide (1)</button>
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'a', 2)">Wide + 1 run (2)</button>
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'a', 4)">Wide + 3 runs (4)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'a', 1)">No Ball (1)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'a', 2)">No Ball + 1 run (2)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'a', 5)">No Ball + 4 (5)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'a', 7)">No Ball + 6 (7)</button>
+                </div>
+              </div>
+
+              <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #075985;">🏃 Byes & Leg Byes (Ball Counted):</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'a', 1)">1 Bye</button>
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'a', 2)">2 Byes</button>
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'a', 4)">4 Byes</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'a', 1)">1 Leg Bye</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'a', 2)">2 Leg Byes</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'a', 4)">4 Leg Byes</button>
+                </div>
+              </div>
+
+              <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #991b1b;">❌ Wickets:</p>
+                <div class="buttons">
+                  <button class="btn-wicket" onclick="addWicket(${game.game_id}, 'a')">Wicket (Ball Counted)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'a', 0)">Run Out (0 runs)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'a', 1)">Run Out (1 run)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'a', 2)">Run Out (2 runs)</button>
+                </div>
+              </div>
+
+              <div style="background: #f3e8ff; padding: 12px; border-radius: 8px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #6b21a8;">🔄 Overthrows:</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'a', 1, 4)">1 + 4 Overthrow (5)</button>
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'a', 2, 4)">2 + 4 Overthrow (6)</button>
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'a', 3, 4)">3 + 4 Overthrow (7)</button>
+                </div>
+              </div>
+            ` : '<p style="color: #666; font-style: italic;">Bowling...</p>'}
+          </div>
+
+          <div class="team-section">
+            ${battingB ? '<div class="batting-badge">🏏 BATTING</div>' : ''}
+            <div class="team-label">${game.team_b}</div>
+            <div class="score-display" contenteditable="true" id="display_b_${game.game_id}" 
+                 onblur="autoSave(${game.game_id})" 
+                 style="cursor: text; border: 2px dashed transparent; padding: 5px; border-radius: 4px;"
+                 onfocus="this.style.borderColor='#667eea'" 
+                 onblur="this.style.borderColor='transparent'; autoSave(${game.game_id})">${game.score_b || '0/0 (0.0 ov)'}</div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">💡 Click score to edit manually</p>
+            
+            ${battingB ? `
+              <div style="background: #f0f9ff; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #0369a1;">⚾ Regular Deliveries:</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'b', 0)">Dot Ball</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'b', 1)">1 Run</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'b', 2)">2 Runs</button>
+                  <button class="btn-run" onclick="addBall(${game.game_id}, 'b', 3)">3 Runs</button>
+                  <button class="btn-boundary" onclick="addBall(${game.game_id}, 'b', 4)">4 (Boundary)</button>
+                  <button class="btn-six" onclick="addBall(${game.game_id}, 'b', 6)">6 (Six)</button>
+                </div>
+              </div>
+
+              <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #92400e;">🚫 Extras (No Ball Counted):</p>
+                <div class="buttons">
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'b', 1)">Wide (1)</button>
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'b', 2)">Wide + 1 run (2)</button>
+                  <button class="btn-extra" onclick="addWide(${game.game_id}, 'b', 4)">Wide + 3 runs (4)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'b', 1)">No Ball (1)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'b', 2)">No Ball + 1 run (2)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'b', 5)">No Ball + 4 (5)</button>
+                  <button class="btn-extra" onclick="addNoBall(${game.game_id}, 'b', 7)">No Ball + 6 (7)</button>
+                </div>
+              </div>
+
+              <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #075985;">🏃 Byes & Leg Byes (Ball Counted):</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'b', 1)">1 Bye</button>
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'b', 2)">2 Byes</button>
+                  <button class="btn-run" onclick="addBye(${game.game_id}, 'b', 4)">4 Byes</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'b', 1)">1 Leg Bye</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'b', 2)">2 Leg Byes</button>
+                  <button class="btn-run" onclick="addLegBye(${game.game_id}, 'b', 4)">4 Leg Byes</button>
+                </div>
+              </div>
+
+              <div style="background: #fee2e2; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #991b1b;">❌ Wickets:</p>
+                <div class="buttons">
+                  <button class="btn-wicket" onclick="addWicket(${game.game_id}, 'b')">Wicket (Ball Counted)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'b', 0)">Run Out (0 runs)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'b', 1)">Run Out (1 run)</button>
+                  <button class="btn-wicket" onclick="addRunOut(${game.game_id}, 'b', 2)">Run Out (2 runs)</button>
+                </div>
+              </div>
+
+              <div style="background: #f3e8ff; padding: 12px; border-radius: 8px;">
+                <p style="font-weight: bold; margin-bottom: 8px; color: #6b21a8;">🔄 Overthrows:</p>
+                <div class="buttons">
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'b', 1, 4)">1 + 4 Overthrow (5)</button>
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'b', 2, 4)">2 + 4 Overthrow (6)</button>
+                  <button class="btn-run" onclick="addOverthrow(${game.game_id}, 'b', 3, 4)">3 + 4 Overthrow (7)</button>
+                </div>
+              </div>
+            ` : '<p style="color: #666; font-style: italic;">Bowling...</p>'}
+          </div>
+
+          <div style="border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
+            <button class="btn-switch" onclick="switchInnings(${game.game_id})">🔄 Switch Innings</button>
+            
+            <!-- Manual Innings Control -->
+            <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 10px;">
+              <p style="font-weight: bold; margin-bottom: 8px; color: #0369a1;">⚙️ Manual Innings Control:</p>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label style="font-weight: 600;">Innings:</label>
+                <select id="innings_${game.game_id}" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #0369a1;">
+                  <option value="1" ${game.batting_team === 'team_a' ? 'selected' : ''}>1st Innings</option>
+                  <option value="2" ${game.batting_team === 'team_b' ? 'selected' : ''}>2nd Innings</option>
+                </select>
+                
+                <label style="font-weight: 600; margin-left: 10px;">Batting Team:</label>
+                <select id="batting_team_${game.game_id}" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #0369a1;">
+                  <option value="team_a" ${game.batting_team === 'team_a' ? 'selected' : ''}>${game.team_a}</option>
+                  <option value="team_b" ${game.batting_team === 'team_b' ? 'selected' : ''}>${game.team_b}</option>
+                </select>
+                
+                <button class="btn-success" onclick="setManualInnings(${game.game_id})" style="margin-left: 10px;">✅ Set Innings</button>
+              </div>
+            </div>
+            
+            <div class="buttons" style="margin-top: 10px;">
+              <button class="btn-warning" onclick="setStatus(${game.game_id}, 'UPCOMING')">Upcoming</button>
+              <button class="btn-success" onclick="setStatus(${game.game_id}, 'LIVE')">Start</button>
+              <button class="btn-danger" onclick="setStatus(${game.game_id}, 'ENDED')">End</button>
+            </div>
+            <select id="winner_${game.game_id}" onchange="autoSave(${game.game_id})">
+              <option value="">No Winner</option>
+              <option value="${game.team_a}" ${game.winner === game.team_a ? 'selected' : ''}>${game.team_a}</option>
+              <option value="${game.team_b}" ${game.winner === game.team_b ? 'selected' : ''}>${game.team_b}</option>
+            </select>
+          </div>
+        `;
+      }
+
+      function renderPointsSport(game) {
+        return `
+          <div class="game-header">
+            <div class="game-title">${game.sport} (${game.gender})</div>
+            <div class="status status-${game.status}">${game.status}</div>
+          </div>
+
+          <div class="team-section">
+            <div class="team-label">${game.team_a}</div>
+            <div class="score-display" contenteditable="true" id="display_a_${game.game_id}" 
+                 onblur="autoSave(${game.game_id})" 
+                 style="cursor: text; border: 2px dashed transparent; padding: 5px; border-radius: 4px;"
+                 onfocus="this.style.borderColor='#667eea'" 
+                 onblur="this.style.borderColor='transparent'; autoSave(${game.game_id})">${game.score_a || '0'}</div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">💡 Click score to edit manually</p>
+            <div class="buttons">
+              <button class="btn-success" onclick="addPoints(${game.game_id}, 'a', 1)">+1</button>
+              <button class="btn-success" onclick="addPoints(${game.game_id}, 'a', 2)">+2</button>
+              <button class="btn-danger" onclick="addPoints(${game.game_id}, 'a', -1)">-1</button>
+            </div>
+          </div>
+
+          <div class="team-section">
+            <div class="team-label">${game.team_b}</div>
+            <div class="score-display" contenteditable="true" id="display_b_${game.game_id}" 
+                 onblur="autoSave(${game.game_id})" 
+                 style="cursor: text; border: 2px dashed transparent; padding: 5px; border-radius: 4px;"
+                 onfocus="this.style.borderColor='#667eea'" 
+                 onblur="this.style.borderColor='transparent'; autoSave(${game.game_id})">${game.score_b || '0'}</div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px;">💡 Click score to edit manually</p>
+            <div class="buttons">
+              <button class="btn-success" onclick="addPoints(${game.game_id}, 'b', 1)">+1</button>
+              <button class="btn-success" onclick="addPoints(${game.game_id}, 'b', 2)">+2</button>
+              <button class="btn-danger" onclick="addPoints(${game.game_id}, 'b', -1)">-1</button>
+            </div>
+          </div>
+
+          <div style="border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
+            <!-- Manual Set Control -->
+            <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+              <p style="font-weight: bold; margin-bottom: 8px; color: #92400e;">⚙️ Current Set:</p>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label style="font-weight: 600;">Set Number:</label>
+                <input type="number" id="current_set_${game.game_id}" min="1" max="5" value="${game.current_set || 1}" 
+                       style="padding: 6px 10px; border-radius: 4px; border: 1px solid #92400e; width: 80px;">
+                <button class="btn-success" onclick="setCurrentSet(${game.game_id})" style="margin-left: 10px;">✅ Set Number</button>
+              </div>
+            </div>
+            
+            <div class="buttons">
+              <button class="btn-warning" onclick="setStatus(${game.game_id}, 'UPCOMING')">Upcoming</button>
+              <button class="btn-success" onclick="setStatus(${game.game_id}, 'LIVE')">Start</button>
+              <button class="btn-danger" onclick="setStatus(${game.game_id}, 'ENDED')">End</button>
+            </div>
+            <select id="winner_${game.game_id}" onchange="autoSave(${game.game_id})">
+              <option value="">No Winner</option>
+              <option value="${game.team_a}" ${game.winner === game.team_a ? 'selected' : ''}>${game.team_a}</option>
+              <option value="${game.team_b}" ${game.winner === game.team_b ? 'selected' : ''}>${game.team_b}</option>
+            </select>
+          </div>
+        `;
+      }
+
+      function renderWinnerOnly(game) {
+        return `
+          <div class="game-header">
+            <div class="game-title">${game.sport} (${game.gender})</div>
+            <div class="status status-${game.status}">${game.status}</div>
+          </div>
+
+          <div style="padding: 20px; text-align: center;">
+            <p style="font-size: 16px; color: #666; margin-bottom: 15px;">Winner-only event</p>
+            <input 
+              type="text" 
+              id="winner_${game.game_id}" 
+              placeholder="Enter winner name (e.g., MBA 1st Year)" 
+              value="${game.winner || ''}"
+              onchange="autoSave(${game.game_id})"
+              style="width: 100%; max-width: 400px; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; text-align: center;"
+            />
+            <p style="font-size: 12px; color: #999; margin-top: 8px;">💡 Type the winner's name and it will auto-save</p>
+          </div>
+
+          <div style="border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
+            <div class="buttons">
+              <button class="btn-warning" onclick="setStatus(${game.game_id}, 'UPCOMING')">Upcoming</button>
+              <button class="btn-success" onclick="setStatus(${game.game_id}, 'LIVE')">Start</button>
+              <button class="btn-danger" onclick="setStatus(${game.game_id}, 'ENDED')">End</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // Cricket functions - Comprehensive rules
+
+      // Regular ball (counts as a ball)
+      window.addBall = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        score.balls += 1;
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Wide (adds runs, NO ball counted)
+      window.addWide = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        // NO ball increment for wide
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // No Ball (adds runs, NO ball counted)
+      window.addNoBall = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        // NO ball increment for no ball
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Bye (adds runs, ball IS counted)
+      window.addBye = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        score.balls += 1; // Ball counted
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Leg Bye (adds runs, ball IS counted)
+      window.addLegBye = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        score.balls += 1; // Ball counted
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Wicket (ball IS counted)
+      window.addWicket = function (gameId, team) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.wickets += 1;
+        score.balls += 1; // Ball counted
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Run Out (adds runs, wicket, ball IS counted)
+      window.addRunOut = function (gameId, team, runs) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += runs;
+        score.wickets += 1;
+        score.balls += 1; // Ball counted
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Overthrow (initial runs + overthrow runs, ball IS counted)
+      window.addOverthrow = function (gameId, team, initialRuns, overthrowRuns) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += (initialRuns + overthrowRuns);
+        score.balls += 1; // Ball counted
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      // Old extra function - kept for compatibility
+      window.addExtra = function (gameId, team, type) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const score = parseScore(display.innerText);
+        score.runs += 1;
+        if (type !== 'wide' && type !== 'noball') {
+          score.balls += 1;
+        }
+        display.innerText = formatScore(score.runs, score.wickets, score.balls);
+        autoSave(gameId);
+      }
+
+      window.switchInnings = function (gameId) {
+        const game = gamesData.find(g => g.game_id === gameId);
+        const newBatting = game.batting_team === 'team_a' ? 'team_b' : 'team_a';
+
+        db.from('scores').update({ batting_team: newBatting }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else { alert('Innings switched!'); loadGames(); }
+        });
+      }
+
+      // Manual innings control
+      window.setManualInnings = function (gameId) {
+        const battingTeamSelect = document.getElementById(`batting_team_${gameId}`);
+        const battingTeam = battingTeamSelect.value;
+
+        db.from('scores').update({ batting_team: battingTeam }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else {
+            alert('Innings set successfully!');
+            loadGames();
+          }
+        });
+      }
+
+      // Manual set control for volleyball/throwball/handball
+      window.setCurrentSet = function (gameId) {
+        const setInput = document.getElementById(`current_set_${gameId}`);
+        const currentSet = parseInt(setInput.value) || 1;
+
+        db.from('scores').update({ current_set: currentSet }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else {
+            alert(`Set number updated to ${currentSet}!`);
+            loadGames();
+          }
+        });
+      }
+
+      // Points sports functions
+      window.addPoints = function (gameId, team, points) {
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        const current = parseInt(display.innerText) || 0;
+        display.innerText = Math.max(0, current + points);
+        autoSave(gameId);
+      }
+
+      // Manual edit functions
+      window.applyManual = function (gameId, team) {
+        const input = document.getElementById(`manual_${team}_${gameId}`);
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        if (input.value.trim()) {
+          display.innerText = input.value.trim();
+          input.value = '';
+        }
+      }
+
+      window.applyManualPoints = function (gameId, team) {
+        const input = document.getElementById(`manual_${team}_${gameId}`);
+        const display = document.getElementById(`display_${team}_${gameId}`);
+        if (input.value.trim()) {
+          display.innerText = input.value.trim();
+          input.value = '';
+        }
+      }
+
+      window.setStatus = function (gameId, status) {
+        db.from('scores').update({ status, show_score: status !== 'UPCOMING' }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else { console.log('✅ Status updated'); loadGames(); }
+        });
+      }
+
+      // Auto-save function - saves instantly
+      window.autoSave = function (gameId) {
+        const game = gamesData.find(g => g.game_id === gameId);
+        if (!game) return;
+
+        const winner = document.getElementById(`winner_${gameId}`).value;
+        let updates = { winner: winner || null };
+
+        if (game.sport === 'cricket') {
+          updates.score_a = document.getElementById(`display_a_${gameId}`).innerText;
+          updates.score_b = document.getElementById(`display_b_${gameId}`).innerText;
+        } else if (['volleyball', 'throwball', 'handball'].includes(game.sport)) {
+          updates.score_a = document.getElementById(`display_a_${gameId}`).innerText;
+          updates.score_b = document.getElementById(`display_b_${gameId}`).innerText;
+        }
+
+        db.from('scores').update(updates).eq('game_id', gameId).then(({ error }) => {
+          if (error) {
+            console.error('❌ Auto-save error:', error.message);
+          } else {
+            console.log('✅ Auto-saved game', gameId);
+          }
+        });
+      }
+
+      // Logout function
+      window.logout = function () {
+        sessionStorage.removeItem('adminAuth');
+        alert('✅ Logged out successfully!');
+        window.location.href = 'index.html';
+      }
+
+      // Load games once on page load (NO auto-refresh to prevent value resets)
+      loadGames();
+
+      // Manual refresh button
+      document.querySelector('.header').innerHTML += '<button onclick="loadGames()" style="margin-top: 10px; padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">🔄 Refresh Data</button>';
+    })();
+  </script>
+</body>
+
+</html>

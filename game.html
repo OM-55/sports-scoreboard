@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Game Details</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .game-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #eee;
+        }
+
+        .game-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status-LIVE {
+            background: #dcfce7;
+            color: #166534;
+            animation: pulse 2s infinite;
+        }
+
+        .status-UPCOMING {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-ENDED {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .batting-info {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0369a1;
+        }
+
+        .team-section {
+            margin: 25px 0;
+            padding: 25px;
+            background: #f9fafb;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .batting-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #10b981;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .bowling-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ef4444;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .team-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .winner-section {
+            background: #dcfce7;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .winner-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #166534;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="index.html" class="back-button">← Back to All Games</a>
+
+        <div class="game-card">
+            <div class="game-header">
+                <div class="game-title" id="gameTitle">Loading...</div>
+                <div class="status" id="gameStatus">LOADING</div>
+            </div>
+
+            <div class="batting-info" id="battingInfo">Loading...</div>
+
+            <div class="team-section" id="teamASection">
+                <div id="teamABadge"></div>
+                <div class="team-name" id="teamAName">Team A</div>
+                <div class="score" id="teamAScore">—</div>
+            </div>
+
+            <div class="team-section" id="teamBSection">
+                <div id="teamBBadge"></div>
+                <div class="team-name" id="teamBName">Team B</div>
+                <div class="score" id="teamBScore">—</div>
+            </div>
+
+            <div class="winner-section hidden" id="winnerSection">
+                <div class="winner-text" id="winnerText">Winner: —</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        (function () {
+            const SUPABASE_URL = "https://cbyvvnugycxpzrjjudff.supabase.co";
+            const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNieXZ2bnVneWN4cHpyamp1ZGZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MDY3MDIsImV4cCI6MjA4NTA4MjcwMn0.M2LQuMbTB3v4fI4URlIP73tP_THHEYS7xOMp-OBO9RU";
+
+            const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+            // Get game ID from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+
+            if (!gameId) {
+                alert('No game ID specified!');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            console.log('🔄 Loading game ID:', gameId);
+
+            async function loadGame() {
+                try {
+                    const { data, error } = await supabase
+                        .from('scores')
+                        .select('*')
+                        .eq('game_id', gameId)
+                        .single();
+
+                    if (error) {
+                        console.error('❌ Error:', error);
+                        alert('Error loading game: ' + error.message);
+                        return;
+                    }
+
+                    if (!data) {
+                        alert('Game not found!');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    console.log('✅ Game data:', data);
+
+                    // Update page
+                    document.getElementById('page-title').textContent = `${data.sport} (${data.gender}) - Live Score`;
+                    document.getElementById('gameTitle').textContent = `${data.sport} (${data.gender})`;
+
+                    const statusEl = document.getElementById('gameStatus');
+                    statusEl.textContent = data.status;
+                    statusEl.className = `status status-${data.status}`;
+
+                    // Batting info
+                    const battingInfoEl = document.getElementById('battingInfo');
+                    if (data.sport === 'cricket' && data.status === 'LIVE' && data.batting_team) {
+                        const battingTeam = data.batting_team === 'team_a' ? data.team_a : data.team_b;
+                        const bowlingTeam = data.batting_team === 'team_a' ? data.team_b : data.team_a;
+                        battingInfoEl.innerHTML = `🏏 ${battingTeam} is BATTING | ⚾ ${bowlingTeam} is BOWLING`;
+                        battingInfoEl.classList.remove('hidden');
+                    } else {
+                        battingInfoEl.classList.add('hidden');
+                    }
+
+                    // Team A
+                    document.getElementById('teamAName').textContent = data.team_a;
+                    document.getElementById('teamAScore').textContent = data.score_a || '0';
+
+                    const teamABadge = document.getElementById('teamABadge');
+                    teamABadge.innerHTML = '';
+                    if (data.sport === 'cricket' && data.batting_team === 'team_a') {
+                        teamABadge.className = 'batting-badge';
+                        teamABadge.textContent = '🏏 BATTING';
+                    } else if (data.sport === 'cricket' && data.batting_team === 'team_b') {
+                        teamABadge.className = 'bowling-badge';
+                        teamABadge.textContent = '⚾ BOWLING';
+                    }
+
+                    // Team B
+                    document.getElementById('teamBName').textContent = data.team_b;
+                    document.getElementById('teamBScore').textContent = data.score_b || '0';
+
+                    const teamBBadge = document.getElementById('teamBBadge');
+                    teamBBadge.innerHTML = '';
+                    if (data.sport === 'cricket' && data.batting_team === 'team_b') {
+                        teamBBadge.className = 'batting-badge';
+                        teamBBadge.textContent = '🏏 BATTING';
+                    } else if (data.sport === 'cricket' && data.batting_team === 'team_a') {
+                        teamBBadge.className = 'bowling-badge';
+                        teamBBadge.textContent = '⚾ BOWLING';
+                    }
+
+                    // Winner
+                    if (data.status === 'ENDED' && data.winner) {
+                        document.getElementById('winnerSection').classList.remove('hidden');
+                        document.getElementById('winnerText').textContent = `🏆 Winner: ${data.winner}`;
+                    } else {
+                        document.getElementById('winnerSection').classList.add('hidden');
+                    }
+
+                    console.log('✅ Page updated');
+                } catch (err) {
+                    console.error('❌ Exception:', err);
+                    alert('Error: ' + err.message);
+                }
+            }
+
+            // Load initially
+            loadGame();
+
+            // Auto-refresh every 3 seconds
+            setInterval(loadGame, 3000);
+        })();
+    </script>
+</body>
+
+</html>

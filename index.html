@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description"
+    content="Live sports scores and updates for cricket, volleyball, throwball, and more. Real-time scoreboard with auto-refresh." />
+  <meta name="keywords" content="sports, scoreboard, live scores, cricket, volleyball, throwball, handball, relay" />
+  <meta name="author" content="Palak Mallani" />
+  <title>🏆 Live Sports Scoreboard - Real-time Updates</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
+  <link rel="stylesheet" href="styles.css?v=2.0" />
+</head>
+
+<body>
+
+  <div class="title">
+    <h1>Live Sports Scoreboard</h1>
+    <p>Real-time Updates • All Events</p>
+    <button onclick="location.reload(true)"
+      style="margin-top: 15px; padding: 10px 20px; background: #00a86b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">🔄
+      Refresh Now</button>
+  </div>
+
+  <div class="grid" id="scoreboardGrid">
+    <!-- Loading state -->
+    <div class="loading-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+      <div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+      <h2 style="color: white; margin-bottom: 10px;">Loading Scores...</h2>
+      <p style="color: #ffd700;">Connecting to database...</p>
+    </div>
+
+    <div class="game-card" data-game-id="1">
+      <h3>🏏 Cricket (Boys)</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="2">
+      <h3>🏏 Cricket (Girls)</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="3">
+      <h3>🏐 Volleyball (Boys)</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="4">
+      <h3>🏐 Throwball (Girls)</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="5">
+      <h3>🏃 Relay</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="6">
+      <h3>💪 Tug of War</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+    <div class="game-card" data-game-id="7">
+      <h3>🎵 Kadam Taal</h3>
+      <p class="game-status">STATUS: —</p>
+      <div class="scores"></div>
+      <p class="winner hidden">Winner: —</p>
+    </div>
+
+  </div>
+
+  <!-- Credit -->
+  <div class="credit">by Palak Mallani</div>
+
+  <!-- Supabase - Load with proper initialization -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Wait for Supabase library to load
+    if (window.supabase) {
+      console.log('✅ Supabase library loaded successfully');
+      // Load the scoreboard script
+      const script = document.createElement('script');
+      script.src = './supabase.js';
+      script.onerror = function () {
+        console.error('❌ Failed to load supabase.js');
+      };
+      document.body.appendChild(script);
+    } else {
+      console.error('❌ Supabase library not found');
+      // Retry after a short delay
+      setTimeout(function () {
+        if (window.supabase) {
+          const script = document.createElement('script');
+          script.src = './supabase.js';
+          document.body.appendChild(script);
+        } else {
+          alert('ERROR: Cannot connect to Supabase! Please refresh the page.');
+        }
+      }, 1000);
+    }
+  </script>
+
+</body>
+
+</html>

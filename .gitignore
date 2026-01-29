@@ -1,0 +1,29 @@
+# Test files
+test-colors.html
+
+# Old files
+admin.html
+
+# Documentation (optional - remove these lines if you want to include docs)
+CACHE_FIX.md
+COLOR_UPDATE_SUMMARY.md
+DEBUG_COLORS.md
+UI_FIXES.md
+DEPLOY_COMMANDS.md
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
