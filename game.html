@@ -286,12 +286,51 @@
                             }
                         }
 
-                        const headerText = data.status === 'ENDED' ? 'FINAL SET SCORES' : `🏐 SET ${currentSet}`;
-                        battingInfoEl.innerHTML = `
-                            <div style="font-size: 20px; color: #059669; font-weight: 800; margin-bottom: 5px;">${headerText}</div>
-                            <div style="font-size: 15px; color: #374151;">Sets Won: ${winsA} - ${winsB}</div>
-                            ${historyHTML}
-                        `;
+                        if (data.status === 'ENDED') {
+                            // TABLE LAYOUT FOR ENDED GAMES
+                            const setKeys = data.set_scores ? Object.keys(data.set_scores).sort() : [];
+                            const nameA = (data.team_a && data.team_a.trim() && data.team_a !== '-') ? data.team_a : 'MBA 1st Year';
+                            const nameB = (data.team_b && data.team_b.trim() && data.team_b !== '-') ? data.team_b : 'MBA 2nd Year';
+
+                            let tableHTML = '<table style="width:100%; text-align:center; border-collapse: collapse; margin-top:10px; background:white; border-radius:8px; overflow:hidden;">';
+                            // Header
+                            tableHTML += '<thead style="background:#d1fae5; color:#065f46;"><tr><th style="padding:8px 12px; text-align:left;">Team</th>';
+                            setKeys.forEach(k => tableHTML += `<th style="padding:8px;">${k.replace('set', 'S')}</th>`);
+                            tableHTML += '</tr></thead><tbody>';
+
+                            // Row A
+                            tableHTML += `<tr style="border-bottom:1px solid #eee;"><td style="padding:10px 12px; text-align:left; font-weight:bold; color:#333;">${nameA}</td>`;
+                            setKeys.forEach(k => {
+                                const s = data.set_scores[k];
+                                const isWinner = (s.winner === 'team_a' || parseInt(s.score_a) > parseInt(s.score_b));
+                                tableHTML += `<td style="padding:8px; font-weight:bold; color:${isWinner ? '#059669' : '#666'};">${s.score_a}</td>`;
+                            });
+                            tableHTML += '</tr>';
+
+                            // Row B
+                            tableHTML += `<tr><td style="padding:10px 12px; text-align:left; font-weight:bold; color:#333;">${nameB}</td>`;
+                            setKeys.forEach(k => {
+                                const s = data.set_scores[k];
+                                const isWinner = (s.winner === 'team_b' || parseInt(s.score_b) > parseInt(s.score_a));
+                                tableHTML += `<td style="padding:8px; font-weight:bold; color:${isWinner ? '#059669' : '#666'};">${s.score_b}</td>`;
+                            });
+                            tableHTML += '</tr></tbody></table>';
+
+                            battingInfoEl.innerHTML = `
+                                <div style="font-size: 20px; color: #059669; font-weight: 800; margin-bottom: 5px;">FINAL SCORECARD</div>
+                                <div style="font-size: 14px; color: #374151; margin-bottom:5px;">Sets Won: ${winsA} - ${winsB}</div>
+                                ${tableHTML}
+                             `;
+                        } else {
+                            // LIVE VIEW (Standard)
+                            const headerText = `🏐 SET ${currentSet}`;
+                            battingInfoEl.innerHTML = `
+                                <div style="font-size: 20px; color: #059669; font-weight: 800; margin-bottom: 5px;">${headerText}</div>
+                                <div style="font-size: 15px; color: #374151;">Sets Won: ${winsA} - ${winsB}</div>
+                                ${historyHTML}
+                             `;
+                        }
+
                         battingInfoEl.style.backgroundColor = '#ecfdf5';
                         battingInfoEl.classList.remove('hidden');
                     }
