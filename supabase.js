@@ -129,11 +129,11 @@ async function loadScores() {
 
           scoreHTML += `
             <div class="team">
-              <span class="team-name">${game.team_a}</span>
+              <span class="team-name">${game.team_a || 'MBA 1st Year'}</span>
               <span class="team-score">${game.score_a || '0'}</span>
             </div>
             <div class="team">
-              <span class="team-name">${game.team_b}</span>
+              <span class="team-name">${game.team_b || 'MBA 2nd Year'}</span>
               <span class="team-score">${game.score_b || '0'}</span>
             </div>
           `;
