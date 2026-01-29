@@ -302,9 +302,11 @@
                     // Decide if scores should be shown
                     const winnerOnlySports = ['relay', 'tug of war', 'kadam taal', 'musical chairs'];
                     const isWinnerOnly = winnerOnlySports.some(s => data.sport.toLowerCase().includes(s));
-                    // User requested empty space instead of dashes
-                    const scoreDisplayA = isWinnerOnly ? '&nbsp;' : (data.score_a || '0');
-                    const scoreDisplayB = isWinnerOnly ? '&nbsp;' : (data.score_b || '0');
+                    const isVolleyEnded = ['volleyball', 'throwball', 'handball'].includes(data.sport) && data.status === 'ENDED';
+
+                    // User requested empty space instead of dashes (and hide scores if Volley Ended)
+                    const scoreDisplayA = (isWinnerOnly || isVolleyEnded) ? '&nbsp;' : (data.score_a || '0');
+                    const scoreDisplayB = (isWinnerOnly || isVolleyEnded) ? '&nbsp;' : (data.score_b || '0');
 
                     // Robust Team Name Logic (Ignore dashes)
                     function isValidName(name) {

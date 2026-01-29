@@ -138,14 +138,18 @@ async function loadScores() {
             return name;
           };
 
+          const isVolleyEnded = ['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'ENDED';
+          const scoreDisplayA = isVolleyEnded ? '' : (game.score_a || '0');
+          const scoreDisplayB = isVolleyEnded ? '' : (game.score_b || '0');
+
           scoreHTML += `
             <div class="team">
               <span class="team-name">${cleanName(game.team_a, 'MBA 1st Year')}</span>
-              <span class="team-score">${game.score_a || '0'}</span>
+              <span class="team-score">${scoreDisplayA}</span>
             </div>
             <div class="team">
               <span class="team-name">${cleanName(game.team_b, 'MBA 2nd Year')}</span>
-              <span class="team-score">${game.score_b || '0'}</span>
+              <span class="team-score">${scoreDisplayB}</span>
             </div>
           `;
         } else {
