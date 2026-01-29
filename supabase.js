@@ -42,12 +42,16 @@ async function loadScores() {
   let wins2nd = 0;
 
   if (data) {
-    const override = data.find(g => g.game_id === 100);
+    const host = data.find(g => g.game_id === 1);
+    let manualActive = false;
 
-    if (override && override.status === 'MANUAL') {
-      wins1st = override.score_a;
-      wins2nd = override.score_b;
-    } else {
+    if (host && host.set_scores && host.set_scores.STANDINGS && host.set_scores.STANDINGS.active) {
+      manualActive = true;
+      wins1st = host.set_scores.STANDINGS.w1;
+      wins2nd = host.set_scores.STANDINGS.w2;
+    }
+
+    if (!manualActive) {
       data.forEach(g => {
         if (g.game_id === 100) return;
         if (g.status === 'ENDED' && g.winner) {
