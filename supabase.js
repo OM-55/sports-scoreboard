@@ -90,7 +90,10 @@ async function loadScores() {
         const isWinnerOnly = winnerOnlySports.some(s => game.sport.toLowerCase().includes(s));
 
         if (isWinnerOnly) {
-          scoreHTML += `<p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">${game.status === 'ENDED' ? 'Event Ended' : 'Winner-only event'}</p>`;
+          // Only show 'Winner-only event' if NOT ended. If ended, show nothing (cleaner ui)
+          if (game.status !== 'ENDED') {
+            scoreHTML += `<p style="text-align: center; color: #666; font-style: italic; margin-top: 10px;">Winner-only event</p>`;
+          }
         }
         else if (game.score_a || game.score_b) {
           // For set-based sports: show current set and sets won
