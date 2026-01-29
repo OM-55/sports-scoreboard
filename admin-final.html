@@ -458,22 +458,33 @@
             
             <!-- Manual Innings Control -->
             <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-top: 10px;">
-              <p style="font-weight: bold; margin-bottom: 8px; color: #0369a1;">⚙️ Manual Innings Control:</p>
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <label style="font-weight: 600;">Innings:</label>
-                <select id="innings_${game.game_id}" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #0369a1;">
-                  <option value="1" ${game.batting_team === 'team_a' ? 'selected' : ''}>1st Innings</option>
-                  <option value="2" ${game.batting_team === 'team_b' ? 'selected' : ''}>2nd Innings</option>
-                </select>
-                
-                <label style="font-weight: 600; margin-left: 10px;">Batting Team:</label>
-                <select id="batting_team_${game.game_id}" style="padding: 6px 10px; border-radius: 4px; border: 1px solid #0369a1;">
+              <p style="font-weight: bold; margin-bottom: 8px; color: #0369a1;">⚙️ Batting & Innings Control:</p>
+              
+              <!-- Who is batting -->
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                <label style="font-weight: 600; min-width: 120px;">Who is batting?</label>
+                <select id="batting_team_${game.game_id}" style="padding: 8px 12px; border-radius: 4px; border: 2px solid #0369a1; font-weight: 600; flex: 1; min-width: 150px;">
                   <option value="team_a" ${game.batting_team === 'team_a' ? 'selected' : ''}>${game.team_a}</option>
                   <option value="team_b" ${game.batting_team === 'team_b' ? 'selected' : ''}>${game.team_b}</option>
                 </select>
-                
-                <button class="btn-success" onclick="setManualInnings(${game.game_id})" style="margin-left: 10px;">✅ Set Innings</button>
               </div>
+              
+              <!-- Which innings -->
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px;">
+                <label style="font-weight: 600; min-width: 120px;">Which innings?</label>
+                <select id="innings_number_${game.game_id}" style="padding: 8px 12px; border-radius: 4px; border: 2px solid #0369a1; font-weight: 600; flex: 1; min-width: 150px;">
+                  <option value="1" ${game.innings_number === 1 ? 'selected' : ''}>1st Innings</option>
+                  <option value="2" ${game.innings_number === 2 ? 'selected' : ''}>2nd Innings</option>
+                </select>
+              </div>
+              
+              <button class="btn-success" onclick="setManualInnings(${game.game_id})" style="width: 100%; padding: 10px; font-size: 15px;">
+                ✅ Set Batting Team & Innings
+              </button>
+              
+              <p style="font-size: 11px; color: #0369a1; margin-top: 8px; font-style: italic;">
+                💡 Set who bats and which innings. Use "🔄 Switch Innings" to swap batting team quickly.
+              </p>
             </div>
             
             <div class="buttons" style="margin-top: 10px;">
@@ -527,17 +538,45 @@
             </div>
           </div>
 
-          <div style="border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
-            <!-- Manual Set Control -->
-            <div style="background: #fef3c7; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
-              <p style="font-weight: bold; margin-bottom: 8px; color: #92400e;">⚙️ Current Set:</p>
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <label style="font-weight: 600;">Set Number:</label>
-                <input type="number" id="current_set_${game.game_id}" min="1" max="5" value="${game.current_set || 1}" 
-                       style="padding: 6px 10px; border-radius: 4px; border: 1px solid #92400e; width: 80px;">
-                <button class="btn-success" onclick="setCurrentSet(${game.game_id})" style="margin-left: 10px;">✅ Set Number</button>
+          <!-- Set Tracking System -->
+          <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <p style="font-weight: bold; margin-bottom: 10px; color: #92400e;">🏐 Set Tracking:</p>
+            
+            <!-- Current Set Display -->
+            <div style="background: white; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-weight: 600;">Current Set:</span>
+                <span style="font-size: 20px; font-weight: 700; color: #92400e;">Set ${game.current_set || 1}</span>
+              </div>
+              
+              <!-- Set Winners History -->
+              <div id="set_history_${game.game_id}" style="font-size: 13px; color: #666;">
+                ${generateSetHistory(game)}
               </div>
             </div>
+            
+            <!-- Set Controls -->
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+              <button class="btn-primary" onclick="finishSet(${game.game_id}, 'team_a')" style="flex: 1; min-width: 120px;">
+                ✅ ${game.team_a} Won Set
+              </button>
+              <button class="btn-primary" onclick="finishSet(${game.game_id}, 'team_b')" style="flex: 1; min-width: 120px;">
+                ✅ ${game.team_b} Won Set
+              </button>
+            </div>
+            
+            <!-- Manual Set Number -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <label style="font-weight: 600; font-size: 13px;">Jump to Set:</label>
+              <input type="number" id="manual_set_${game.game_id}" min="1" max="5" value="${game.current_set || 1}" 
+                     style="padding: 6px 10px; border-radius: 4px; border: 2px solid #92400e; width: 70px; font-weight: 600;">
+              <button class="btn-success" onclick="setCurrentSet(${game.game_id})" style="padding: 6px 12px; font-size: 13px;">
+                Go to Set
+              </button>
+            </div>
+          </div>
+
+          <div style="border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px;">
             
             <div class="buttons">
               <button class="btn-warning" onclick="setStatus(${game.game_id}, 'UPCOMING')">Upcoming</button>
@@ -691,12 +730,18 @@
       // Manual innings control
       window.setManualInnings = function (gameId) {
         const battingTeamSelect = document.getElementById(`batting_team_${gameId}`);
-        const battingTeam = battingTeamSelect.value;
+        const inningsNumberSelect = document.getElementById(`innings_number_${gameId}`);
 
-        db.from('scores').update({ batting_team: battingTeam }).eq('game_id', gameId).then(({ error }) => {
+        const battingTeam = battingTeamSelect.value;
+        const inningsNumber = parseInt(inningsNumberSelect.value);
+
+        db.from('scores').update({
+          batting_team: battingTeam,
+          innings_number: inningsNumber
+        }).eq('game_id', gameId).then(({ error }) => {
           if (error) alert('Error: ' + error.message);
           else {
-            alert('Innings set successfully!');
+            alert(`Set to ${inningsNumber === 1 ? '1st' : '2nd'} Innings - ${battingTeam === 'team_a' ? 'Team A' : 'Team B'} batting!`);
             loadGames();
           }
         });
@@ -741,6 +786,80 @@
           display.innerText = input.value.trim();
           input.value = '';
         }
+      }
+
+      // --- Set Tracking Functions ---
+
+      window.setCurrentSet = function (gameId) {
+        const input = document.getElementById(`manual_set_${gameId}`);
+        const currentSet = parseInt(input.value) || 1;
+
+        db.from('scores').update({ current_set: currentSet }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else { alert('Set number updated!'); loadGames(); }
+        });
+      }
+
+      window.finishSet = function (gameId, winningTeamKey) {
+        const game = gamesData.find(g => g.game_id === gameId);
+        if (!game) return;
+
+        const teamName = winningTeamKey === 'team_a' ? game.team_a : game.team_b;
+        if (!confirm(`Confirm that ${teamName} WON Set ${game.current_set || 1}?\n\nThis will:\n1. Save set score (${game.score_a || 0}-${game.score_b || 0})\n2. Reset scores to 0-0\n3. Move to Set ${(game.current_set || 1) + 1}`)) return;
+
+        // 1. Prepare new history
+        const currentSet = game.current_set || 1;
+        const setScores = game.set_scores || {};
+        const setWinners = game.set_winners || [];
+
+        // Save result for this set
+        setScores[`set${currentSet}`] = {
+          score_a: game.score_a || 0,
+          score_b: game.score_b || 0,
+          winner: winningTeamKey
+        };
+
+        // Add to winners array if not already recorded for this set (simple append)
+        // logic: if we are re-playing a set, we might overwrite. simpler to just append or replace based on index.
+        // Let's use array index logic: index = currentSet - 1
+        setWinners[currentSet - 1] = winningTeamKey;
+
+        // 2. Update DB
+        db.from('scores').update({
+          set_scores: setScores,
+          set_winners: setWinners,
+          current_set: currentSet + 1,
+          score_a: '0', // Reset scores
+          score_b: '0'
+        }).eq('game_id', gameId).then(({ error }) => {
+          if (error) alert('Error: ' + error.message);
+          else {
+            loadGames();
+          }
+        });
+      }
+
+      window.generateSetHistory = function (game) {
+        if (!game.set_scores) return '<p>No sets finished yet.</p>';
+
+        let html = '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
+
+        // Loop through set scores
+        Object.keys(game.set_scores).sort().forEach(key => {
+          const setNum = key.replace('set', '');
+          const data = game.set_scores[key];
+          const winnerName = data.winner === 'team_a' ? game.team_a : game.team_b;
+          const winnerColor = data.winner === 'team_a' ? '#1d4ed8' : '#1d4ed8'; // Blue for info
+
+          html += `
+            <div style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">
+              <strong>Set ${setNum}:</strong> ${winnerName} (${data.score_a}-${data.score_b})
+            </div>
+          `;
+        });
+
+        html += '</div>';
+        return html;
       }
 
       window.setStatus = function (gameId, status) {

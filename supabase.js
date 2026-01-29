@@ -69,14 +69,12 @@ async function loadScores() {
     if (game.sport === 'cricket' && game.status === 'LIVE' && game.batting_team) {
       const battingTeam = game.batting_team === 'team_a' ? game.team_a : game.team_b;
       const bowlingTeam = game.batting_team === 'team_a' ? game.team_b : game.team_a;
-
-      // Determine innings
-      const innings = game.batting_team === 'team_a' ? '1st Innings' : '2nd Innings';
+      const inningsText = game.innings_number === 2 ? '2nd Innings' : '1st Innings';
 
       battingInfoHTML = `
-        <div class="batting-info">
-          <strong>${innings}</strong><br>
-          🏏 ${battingTeam} batting | ⚾ ${bowlingTeam} bowling
+        <div class="batting-info" style="background: #e0f2fe; padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: center;">
+          <div style="font-weight: 700; color: #0369a1; margin-bottom: 5px; font-size: 16px;">${inningsText}</div>
+          <div style="font-size: 14px;">🏏 ${battingTeam} batting | ⚾ ${bowlingTeam} bowling</div>
         </div>
       `;
     }
@@ -88,11 +86,20 @@ async function loadScores() {
         let scoreHTML = battingInfoHTML; // Add batting info first
 
         if (game.score_a || game.score_b) {
-          // For volleyball, throwball, handball - show sets
+          // For set-based sports: show current set and sets won
           if (['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'LIVE') {
-            // Assuming set number is stored or calculated
             const currentSet = game.current_set || 1;
-            scoreHTML += `<div style="text-align: center; font-weight: 600; color: #00a86b; margin-bottom: 10px;">Set ${currentSet}</div>`;
+
+            // Calculate sets won
+            const winsA = (game.set_winners || []).filter(w => w === 'team_a').length;
+            const winsB = (game.set_winners || []).filter(w => w === 'team_b').length;
+
+            scoreHTML += `
+               <div style="background: #ecfdf5; padding: 5px; border-radius: 4px; margin-bottom: 10px; text-align: center;">
+                 <div style="font-weight: 700; color: #059669; font-size: 14px;">SET ${currentSet}</div>
+                 <div style="font-size: 12px; color: #666;">Sets Won: ${winsA} - ${winsB}</div>
+               </div>
+             `;
           }
 
           scoreHTML += `
