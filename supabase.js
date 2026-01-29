@@ -37,6 +37,30 @@ async function loadScores() {
     loadingState.style.display = 'none';
   }
 
+  // Calculate and Update Overall Championship Standings
+  let wins1st = 0;
+  let wins2nd = 0;
+
+  if (data) {
+    data.forEach(g => {
+      if (g.status === 'ENDED' && g.winner) {
+        const w = g.winner.toLowerCase().trim();
+        // Robust check for MBA 1st / 2nd Year variants
+        if (w.includes('1st')) wins1st++;
+        else if (w.includes('2nd') || w.includes('2 nd')) wins2nd++;
+        else if (g.team_a && g.winner === g.team_a && g.team_a.toLowerCase().includes('1st')) wins1st++;
+        else if (g.team_b && g.winner === g.team_b && g.team_b.toLowerCase().includes('2nd')) wins2nd++;
+      }
+    });
+
+    const standEl = document.getElementById('overallStandings');
+    if (standEl) {
+      document.getElementById('wins1st').textContent = wins1st;
+      document.getElementById('wins2nd').textContent = wins2nd;
+      standEl.style.display = 'block';
+    }
+  }
+
   data.forEach(game => {
     const gameCard = document.querySelector(`[data-game-id="${game.game_id}"]`);
 

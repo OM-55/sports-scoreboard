@@ -24,6 +24,29 @@
       Refresh Now</button>
   </div>
 
+  <!-- Overall Standings Summary -->
+  <div id="overallStandings" style="max-width: 600px; margin: 0 auto 30px auto; display: none;">
+    <div
+      style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.2); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <h2
+        style="color: #ffd700; text-align: center; margin: 0 0 15px 0; font-size: 24px; text-transform: uppercase; letter-spacing: 1px;">
+        🏆 Championship Standings</h2>
+      <div style="display: flex; justify-content: space-around; align-items: center;">
+        <div style="text-align: center;">
+          <div style="color: white; font-weight: 700; font-size: 18px; margin-bottom: 5px;">MBA 1st Year</div>
+          <div id="wins1st" style="color: #4ade80; font-size: 36px; font-weight: 800;">0</div>
+          <div style="color: rgba(255,255,255,0.7); font-size: 12px;">WINS</div>
+        </div>
+        <div style="font-size: 24px; color: rgba(255,255,255,0.3);">VS</div>
+        <div style="text-align: center;">
+          <div style="color: white; font-weight: 700; font-size: 18px; margin-bottom: 5px;">MBA 2nd Year</div>
+          <div id="wins2nd" style="color: #60a5fa; font-size: 36px; font-weight: 800;">0</div>
+          <div style="color: rgba(255,255,255,0.7); font-size: 12px;">WINS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="grid" id="scoreboardGrid">
     <!-- Loading state -->
     <div class="loading-state" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
