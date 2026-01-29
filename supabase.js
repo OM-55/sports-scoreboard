@@ -101,10 +101,28 @@ async function loadScores() {
             const winsA = (game.set_winners || []).filter(w => w === 'team_a').length;
             const winsB = (game.set_winners || []).filter(w => w === 'team_b').length;
 
+            // Generate History
+            let historyHTML = '';
+            if (game.set_scores) {
+              const sets = Object.keys(game.set_scores).sort();
+              if (sets.length > 0) {
+                historyHTML = '<div style="margin-top:4px; font-size:11px; color:#555; display:flex; flex-wrap:wrap; justify-content:center; gap:4px;">';
+                sets.forEach(key => {
+                  const s = game.set_scores[key];
+                  const setN = key.replace('set', '');
+                  const sA = s.winner === 'text-green' || s.winner === 'team_a' ? `<b>${s.score_a}</b>` : s.score_a; // heuristic
+                  const sB = s.winner === 'team_b' ? `<b>${s.score_b}</b>` : s.score_b;
+                  historyHTML += `<span style="background:white; padding:2px 5px; border-radius:4px; border:1px solid #d1fae5;">S${setN}: ${s.score_a}-${s.score_b}</span>`;
+                });
+                historyHTML += '</div>';
+              }
+            }
+
             scoreHTML += `
                <div style="background: #ecfdf5; padding: 5px; border-radius: 4px; margin-bottom: 10px; text-align: center;">
                  <div style="font-weight: 700; color: #059669; font-size: 14px;">SET ${currentSet}</div>
-                 <div style="font-size: 12px; color: #666;">Sets Won: ${winsA} - ${winsB}</div>
+                 <div style="font-size: 12px; color: #666; margin-bottom:2px;">Sets Won: ${winsA} - ${winsB}</div>
+                 ${historyHTML}
                </div>
              `;
           }

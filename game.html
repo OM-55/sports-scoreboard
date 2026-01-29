@@ -270,9 +270,24 @@
                         const winsA = (data.set_winners || []).filter(w => w === 'team_a').length;
                         const winsB = (data.set_winners || []).filter(w => w === 'team_b').length;
 
+                        let historyHTML = '';
+                        if (data.set_scores) {
+                            const sets = Object.keys(data.set_scores).sort();
+                            if (sets.length > 0) {
+                                historyHTML = '<div style="margin-top:8px; display:flex; flex-wrap:wrap; justify-content:center; gap:8px;">';
+                                sets.forEach(key => {
+                                    const s = data.set_scores[key];
+                                    const setN = key.replace('set', '');
+                                    historyHTML += `<span style="background:white; padding:4px 8px; border-radius:6px; border:1px solid #d1fae5; font-size:14px; color:#555;">Set ${setN}: <b>${s.score_a}-${s.score_b}</b></span>`;
+                                });
+                                historyHTML += '</div>';
+                            }
+                        }
+
                         battingInfoEl.innerHTML = `
                             <div style="font-size: 20px; color: #059669; font-weight: 800; margin-bottom: 5px;">🏐 SET ${currentSet}</div>
                             <div style="font-size: 15px; color: #374151;">Sets Won: ${winsA} - ${winsB}</div>
+                            ${historyHTML}
                         `;
                         battingInfoEl.style.backgroundColor = '#ecfdf5';
                         battingInfoEl.classList.remove('hidden');
