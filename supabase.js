@@ -96,8 +96,8 @@ async function loadScores() {
           }
         }
         else if (game.score_a || game.score_b) {
-          // For set-based sports: show current set and sets won
-          if (['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'LIVE') {
+          // For set-based sports: show current set and sets won (LIVE or ENDED)
+          if (['volleyball', 'throwball', 'handball'].includes(game.sport) && (game.status === 'LIVE' || game.status === 'ENDED')) {
             const currentSet = game.current_set || 1;
 
             // Calculate sets won
