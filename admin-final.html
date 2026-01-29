@@ -817,17 +817,18 @@
         const game = gamesData.find(g => g.game_id === gameId);
         if (!game) return;
 
+        // READ LIVE SCORE FROM DOM FIRST
+        const scoreA = parseInt(document.getElementById(`display_a_${gameId}`).innerText) || 0;
+        const scoreB = parseInt(document.getElementById(`display_b_${gameId}`).innerText) || 0;
+
         const teamName = winningTeamKey === 'team_a' ? game.team_a : game.team_b;
-        if (!confirm(`Confirm that ${teamName} WON Set ${game.current_set || 1}?\n\nThis will:\n1. Save set score (${game.score_a || 0}-${game.score_b || 0})\n2. Reset scores to 0-0\n3. Move to Set ${(game.current_set || 1) + 1}`)) return;
+        // USE LIVE SCORES IN CONFIRMATION
+        if (!confirm(`Confirm that ${teamName} WON Set ${game.current_set || 1}?\n\nFinal Score: ${scoreA} - ${scoreB}\n\nThis will reset scores to 0-0.`)) return;
 
         // 1. Prepare new history
         const currentSet = game.current_set || 1;
         const setScores = game.set_scores || {};
         const setWinners = game.set_winners || [];
-
-        // READ LIVE SCORE FROM DOM (Fixes 0-0 bug)
-        const scoreA = parseInt(document.getElementById(`display_a_${gameId}`).innerText) || 0;
-        const scoreB = parseInt(document.getElementById(`display_b_${gameId}`).innerText) || 0;
 
         // Save result for this set
         setScores[`set${currentSet}`] = {
@@ -836,9 +837,7 @@
           winner: winningTeamKey
         };
 
-        // Add to winners array if not already recorded for this set (simple append)
-        // logic: if we are re-playing a set, we might overwrite. simpler to just append or replace based on index.
-        // Let's use array index logic: index = currentSet - 1
+        // Add to winners array
         setWinners[currentSet - 1] = winningTeamKey;
 
         // 2. Update DB
