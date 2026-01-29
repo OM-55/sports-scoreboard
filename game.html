@@ -305,11 +305,16 @@
                     const scoreDisplayA = isWinnerOnly ? '&nbsp;' : (data.score_a || '0');
                     const scoreDisplayB = isWinnerOnly ? '&nbsp;' : (data.score_b || '0');
 
+                    // Robust Team Name Logic (Ignore dashes)
+                    function isValidName(name) {
+                        return name && typeof name === 'string' && name.trim() !== '' && name.trim() !== '-' && name.trim() !== '—';
+                    }
+
                     // Team A
                     let tA = data.team_a;
-                    if (!tA || typeof tA !== 'string' || tA.trim() === '') tA = 'MBA 1st Year';
+                    if (!isValidName(tA)) tA = 'MBA 1st Year';
                     document.getElementById('teamAName').textContent = tA;
-                    document.getElementById('teamAScore').innerHTML = scoreDisplayA; // Use innerHTML for &nbsp;
+                    document.getElementById('teamAScore').innerHTML = scoreDisplayA;
 
                     const teamABadge = document.getElementById('teamABadge');
                     teamABadge.innerHTML = '';
@@ -323,7 +328,7 @@
 
                     // Team B
                     let tB = data.team_b;
-                    if (!tB || typeof tB !== 'string' || tB.trim() === '') tB = 'MBA 2nd Year';
+                    if (!isValidName(tB)) tB = 'MBA 2nd Year';
                     document.getElementById('teamBName').textContent = tB;
                     document.getElementById('teamBScore').innerHTML = scoreDisplayB;
 

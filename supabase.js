@@ -127,13 +127,18 @@ async function loadScores() {
              `;
           }
 
+          const cleanName = (name, defaultName) => {
+            if (!name || typeof name !== 'string' || name.trim() === '' || name.trim() === '-' || name.trim() === '—') return defaultName;
+            return name;
+          };
+
           scoreHTML += `
             <div class="team">
-              <span class="team-name">${(game.team_a && game.team_a.trim()) || 'MBA 1st Year'}</span>
+              <span class="team-name">${cleanName(game.team_a, 'MBA 1st Year')}</span>
               <span class="team-score">${game.score_a || '0'}</span>
             </div>
             <div class="team">
-              <span class="team-name">${(game.team_b && game.team_b.trim()) || 'MBA 2nd Year'}</span>
+              <span class="team-name">${cleanName(game.team_b, 'MBA 2nd Year')}</span>
               <span class="team-score">${game.score_b || '0'}</span>
             </div>
           `;
