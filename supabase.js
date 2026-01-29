@@ -96,40 +96,7 @@ async function loadScores() {
           }
         }
         else if (game.score_a || game.score_b) {
-          // For set-based sports: show current set and sets won (LIVE or ENDED)
-          if (['volleyball', 'throwball', 'handball'].includes(game.sport) && (game.status === 'LIVE' || game.status === 'ENDED')) {
-            const currentSet = game.current_set || 1;
-
-            // Calculate sets won
-            const winsA = (game.set_winners || []).filter(w => w === 'team_a').length;
-            const winsB = (game.set_winners || []).filter(w => w === 'team_b').length;
-
-            // Generate History
-            let historyHTML = '';
-            if (game.set_scores) {
-              const sets = Object.keys(game.set_scores).sort();
-              if (sets.length > 0) {
-                historyHTML = '<div style="margin-top:4px; font-size:11px; color:#555; display:flex; flex-wrap:wrap; justify-content:center; gap:4px;">';
-                sets.forEach(key => {
-                  const s = game.set_scores[key];
-                  const setN = key.replace('set', '');
-                  const sA = s.winner === 'text-green' || s.winner === 'team_a' ? `<b>${s.score_a}</b>` : s.score_a; // heuristic
-                  const sB = s.winner === 'team_b' ? `<b>${s.score_b}</b>` : s.score_b;
-                  historyHTML += `<span style="background:white; padding:2px 5px; border-radius:4px; border:1px solid #d1fae5;">S${setN}: ${s.score_a}-${s.score_b}</span>`;
-                });
-                historyHTML += '</div>';
-              }
-            }
-
-            scoreHTML += `
-               <div style="background: #ecfdf5; padding: 5px; border-radius: 4px; margin-bottom: 10px; text-align: center;">
-                 <div style="font-weight: 700; color: #059669; font-size: 14px;">SET ${currentSet}</div>
-                 <div style="font-size: 12px; color: #666; margin-bottom:2px;">Sets Won: ${winsA} - ${winsB}</div>
-                 ${historyHTML}
-               </div>
-             `;
-          }
-
+          const isVolleyEnded = ['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'ENDED';
           const isKadamTaal = game.sport.toLowerCase().includes('kadam') || game.sport.toLowerCase().includes('musical');
 
           const cleanName = (name, defaultName) => {
@@ -138,20 +105,86 @@ async function loadScores() {
             return name;
           };
 
-          const isVolleyEnded = ['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'ENDED';
-          const scoreDisplayA = isVolleyEnded ? '' : (game.score_a || '0');
-          const scoreDisplayB = isVolleyEnded ? '' : (game.score_b || '0');
+          if (isVolleyEnded) {
+            // TABLE VIEW FOR DASHBOARD
+            const keys = game.set_scores ? Object.keys(game.set_scores).sort() : [];
+            const winsA = (game.set_winners || []).filter(w => w === 'team_a').length;
+            const winsB = (game.set_winners || []).filter(w => w === 'team_b').length;
 
-          scoreHTML += `
-            <div class="team">
-              <span class="team-name">${cleanName(game.team_a, 'MBA 1st Year')}</span>
-              <span class="team-score">${scoreDisplayA}</span>
-            </div>
-            <div class="team">
-              <span class="team-name">${cleanName(game.team_b, 'MBA 2nd Year')}</span>
-              <span class="team-score">${scoreDisplayB}</span>
-            </div>
-          `;
+            scoreHTML += `<div style="text-align:center; font-size:12px; font-weight:bold; color:#059669; margin-bottom:4px;">FINAL SETS: ${winsA} - ${winsB}</div>`;
+
+            let table = '<table style="width:100%; border-collapse:collapse; font-size:13px; background:rgba(255,255,255,0.5); border-radius:4px;">';
+            // Header
+            table += '<tr style="border-bottom:1px solid #a7f3d0; color:#065f46;"><th style="text-align:left; padding:4px;">Team</th>';
+            keys.forEach(k => table += `<th style="padding:4px;">${k.replace('set', 'S')}</th>`);
+            table += '</tr>';
+
+            // Row A
+            table += `<tr><td style="padding:4px; font-weight:bold;">${cleanName(game.team_a, 'MBA 1st Year')}</td>`;
+            keys.forEach(k => {
+              const s = game.set_scores[k];
+              const isW = s.winner === 'team_a' || parseInt(s.score_a) > parseInt(s.score_b);
+              table += `<td style="text-align:center; color:${isW ? '#059669' : '#333'}; font-weight:${isW ? 'bold' : 'normal'};">${s.score_a}</td>`;
+            });
+            table += '</tr>';
+
+            // Row B
+            table += `<tr><td style="padding:4px; font-weight:bold;">${cleanName(game.team_b, 'MBA 2nd Year')}</td>`;
+            keys.forEach(k => {
+              const s = game.set_scores[k];
+              const isW = s.winner === 'team_b' || parseInt(s.score_b) > parseInt(s.score_a);
+              table += `<td style="text-align:center; color:${isW ? '#059669' : '#333'}; font-weight:${isW ? 'bold' : 'normal'};">${s.score_b}</td>`;
+            });
+            table += '</tr></table>';
+
+            scoreHTML += table;
+
+          } else {
+            // STANDARD VIEW (Live Volley, Cricket, etc.)
+            if (['volleyball', 'throwball', 'handball'].includes(game.sport) && game.status === 'LIVE') {
+              const currentSet = game.current_set || 1;
+              // Calculate sets won
+              const winsA = (game.set_winners || []).filter(w => w === 'team_a').length;
+              const winsB = (game.set_winners || []).filter(w => w === 'team_b').length;
+
+              // Generate History
+              let historyHTML = '';
+              if (game.set_scores) {
+                const sets = Object.keys(game.set_scores).sort();
+                if (sets.length > 0) {
+                  historyHTML = '<div style="margin-top:4px; font-size:11px; color:#555; display:flex; flex-wrap:wrap; justify-content:center; gap:4px;">';
+                  sets.forEach(key => {
+                    const s = game.set_scores[key];
+                    const setN = key.replace('set', '');
+                    const sA = s.winner === 'text-green' || s.winner === 'team_a' ? `<b>${s.score_a}</b>` : s.score_a; // heuristic
+                    const sB = s.winner === 'team_b' ? `<b>${s.score_b}</b>` : s.score_b;
+                    historyHTML += `<span style="background:white; padding:2px 5px; border-radius:4px; border:1px solid #d1fae5;">S${setN}: ${s.score_a}-${s.score_b}</span>`;
+                  });
+                  historyHTML += '</div>';
+                }
+              }
+
+              scoreHTML += `
+                   <div style="background: #ecfdf5; padding: 5px; border-radius: 4px; margin-bottom: 10px; text-align: center;">
+                     <div style="font-weight: 700; color: #059669; font-size: 14px;">SET ${currentSet}</div>
+                     <div style="font-size: 12px; color: #666; margin-bottom:2px;">Sets Won: ${winsA} - ${winsB}</div>
+                     ${historyHTML}
+                   </div>
+                 `;
+            }
+
+            scoreHTML += `
+                <div class="team">
+                  <span class="team-name">${cleanName(game.team_a, 'MBA 1st Year')}</span>
+                  <span class="team-score">${game.score_a || '0'}</span>
+                </div>
+                <div class="team">
+                  <span class="team-name">${cleanName(game.team_b, 'MBA 2nd Year')}</span>
+                  <span class="team-score">${game.score_b || '0'}</span>
+                </div>
+              `;
+          }
+
         } else {
           scoreHTML += '<p style="text-align: center; color: #666;">Score not available yet</p>';
         }
