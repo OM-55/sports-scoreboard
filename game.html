@@ -164,6 +164,67 @@
         .hidden {
             display: none;
         }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
+                width: 100%;
+            }
+
+            .game-card {
+                padding: 15px;
+                border-radius: 12px;
+            }
+
+            .team-section {
+                padding: 15px;
+                text-align: left;
+                /* Align left for better stacking? OR Center */
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            /* Make badges part of the flow instead of absolute overlapping */
+            .batting-badge,
+            .bowling-badge {
+                position: static;
+                margin-bottom: 10px;
+                align-self: flex-end;
+                /* Keep them somewhat right-aligned or center? */
+                align-self: center;
+                font-size: 11px;
+                padding: 4px 12px;
+            }
+
+            .team-name {
+                font-size: 22px;
+                margin-bottom: 5px;
+                padding-right: 0;
+                /* Remove safety padding */
+            }
+
+            .score {
+                font-size: 36px;
+                /* Reduced from 48px */
+                margin: 10px 0;
+                white-space: nowrap;
+                /* Tries to keep on one line */
+            }
+
+            /* If score is still too big, it might overflow. */
+        }
+
+        /* Further reduction for very small screens */
+        @media (max-width: 380px) {
+            .score {
+                font-size: 28px;
+                white-space: normal;
+                /* Allow wrap if really needed */
+            }
+        }
     </style>
 </head>
 
