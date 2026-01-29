@@ -42,16 +42,23 @@ async function loadScores() {
   let wins2nd = 0;
 
   if (data) {
-    data.forEach(g => {
-      if (g.status === 'ENDED' && g.winner) {
-        const w = g.winner.toLowerCase().trim();
-        // Robust check for MBA 1st / 2nd Year variants
-        if (w.includes('1st')) wins1st++;
-        else if (w.includes('2nd') || w.includes('2 nd')) wins2nd++;
-        else if (g.team_a && g.winner === g.team_a && g.team_a.toLowerCase().includes('1st')) wins1st++;
-        else if (g.team_b && g.winner === g.team_b && g.team_b.toLowerCase().includes('2nd')) wins2nd++;
-      }
-    });
+    const override = data.find(g => g.game_id === 100);
+
+    if (override && override.status === 'MANUAL') {
+      wins1st = override.score_a;
+      wins2nd = override.score_b;
+    } else {
+      data.forEach(g => {
+        if (g.game_id === 100) return;
+        if (g.status === 'ENDED' && g.winner) {
+          const w = g.winner.toLowerCase().trim();
+          if (w.includes('1st')) wins1st++;
+          else if (w.includes('2nd') || w.includes('2 nd')) wins2nd++;
+          else if (g.team_a && g.winner === g.team_a && g.team_a.toLowerCase().includes('1st')) wins1st++;
+          else if (g.team_b && g.winner === g.team_b && g.team_b.toLowerCase().includes('2nd')) wins2nd++;
+        }
+      });
+    }
 
     const standEl = document.getElementById('overallStandings');
     if (standEl) {
@@ -62,6 +69,7 @@ async function loadScores() {
   }
 
   data.forEach(game => {
+    if (game.game_id === 100) return; // Skip display
     const gameCard = document.querySelector(`[data-game-id="${game.game_id}"]`);
 
     if (!gameCard) {
