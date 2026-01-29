@@ -101,7 +101,7 @@
       console.log('✅ Supabase library loaded successfully');
       // Load the scoreboard script
       const script = document.createElement('script');
-      script.src = './supabase.js';
+      script.src = './supabase.js?v=3.5';
       script.onerror = function () {
         console.error('❌ Failed to load supabase.js');
       };
@@ -112,7 +112,7 @@
       setTimeout(function () {
         if (window.supabase) {
           const script = document.createElement('script');
-          script.src = './supabase.js';
+          script.src = './supabase.js?v=3.5';
           document.body.appendChild(script);
         } else {
           alert('ERROR: Cannot connect to Supabase! Please refresh the page.');
