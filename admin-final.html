@@ -825,10 +825,14 @@
         const setScores = game.set_scores || {};
         const setWinners = game.set_winners || [];
 
+        // READ LIVE SCORE FROM DOM (Fixes 0-0 bug)
+        const scoreA = parseInt(document.getElementById(`display_a_${gameId}`).innerText) || 0;
+        const scoreB = parseInt(document.getElementById(`display_b_${gameId}`).innerText) || 0;
+
         // Save result for this set
         setScores[`set${currentSet}`] = {
-          score_a: game.score_a || 0,
-          score_b: game.score_b || 0,
+          score_a: scoreA,
+          score_b: scoreB,
           winner: winningTeamKey
         };
 
