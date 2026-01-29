@@ -127,7 +127,10 @@ async function loadScores() {
              `;
           }
 
+          const isKadamTaal = game.sport.toLowerCase().includes('kadam') || game.sport.toLowerCase().includes('musical');
+
           const cleanName = (name, defaultName) => {
+            if (isKadamTaal) return '';
             if (!name || typeof name !== 'string' || name.trim() === '' || name.trim() === '-' || name.trim() === '—') return defaultName;
             return name;
           };
